@@ -50,7 +50,7 @@ def convert_pascal_to_yolo(pascal_dir, yolo_dir, classes_list):
         try:
             tree = ET.parse(xml_path)
         except ET.ParseError:
-            print(f"[WARN] Błąd parsowania XML w pliku: {xml_file}")
+            print(f"[WARN] XML parsing error in file: {xml_file}")
             continue
 
         root = tree.getroot()
@@ -58,7 +58,7 @@ def convert_pascal_to_yolo(pascal_dir, yolo_dir, classes_list):
         # Odczyt wymiarów obrazu
         size_tag = root.find("size")
         if size_tag is None:
-            print(f"[WARN] Brak tagu <size> w pliku: {xml_file}. Pomijam.")
+            print(f"[WARN] No tag <size> in file: {xml_file}. I'm skipping it.")
             continue
 
         width = int(size_tag.find("width").text)
@@ -99,9 +99,9 @@ def convert_pascal_to_yolo(pascal_dir, yolo_dir, classes_list):
                     f"{class_id} {x_center:.6f} {y_center:.6f} {w:.6f} {h:.6f}\n"
                 )
 
-        print(f"[INFO] Utworzono: {txt_file_path}")
+        print(f"[INFO] Created: {txt_file_path}")
 
-    print("[INFO] Konwersja zakończona!")
+    print("[INFO] Conversion completed!")
 
 
 class App:
@@ -115,27 +115,27 @@ class App:
         self.yolo_dir = ""
 
         # --- Sekcja wyboru folderu z plikami XML ---
-        self.label_pascal = tk.Label(self.master, text="Folder z .xml (Pascal VOC):")
+        self.label_pascal = tk.Label(self.master, text="Folder with .xml (Pascal VOC):")
         self.label_pascal.grid(row=0, column=0, padx=10, pady=5, sticky="e")
 
-        self.entry_pascal = tk.Label(self.master, text="(nie wybrano)")
+        self.entry_pascal = tk.Label(self.master, text="(not selected)")
         self.entry_pascal.grid(row=0, column=1, padx=10, pady=5, sticky="w")
 
         self.btn_pascal = tk.Button(self.master, text="Wybierz folder", command=self.choose_pascal_folder)
         self.btn_pascal.grid(row=0, column=2, padx=10, pady=5)
 
         # --- Sekcja wyboru folderu wyjściowego ---
-        self.label_yolo = tk.Label(self.master, text="Folder docelowy (YOLO):")
+        self.label_yolo = tk.Label(self.master, text="Destination folder (YOLO):")
         self.label_yolo.grid(row=1, column=0, padx=10, pady=5, sticky="e")
 
-        self.entry_yolo = tk.Label(self.master, text="(nie wybrano)")
+        self.entry_yolo = tk.Label(self.master, text="(not selected)")
         self.entry_yolo.grid(row=1, column=1, padx=10, pady=5, sticky="w")
 
-        self.btn_yolo = tk.Button(self.master, text="Wybierz folder", command=self.choose_yolo_folder)
+        self.btn_yolo = tk.Button(self.master, text="Select folder", command=self.choose_yolo_folder)
         self.btn_yolo.grid(row=1, column=2, padx=10, pady=5)
 
         # --- Sekcja wpisania listy klas ---
-        self.label_classes = tk.Label(self.master, text="Lista klas (rozdzielone przecinkami):")
+        self.label_classes = tk.Label(self.master, text="List of classes (comma separated):")
         self.label_classes.grid(row=2, column=0, padx=10, pady=5, sticky="e")
 
         self.entry_classes = tk.Entry(self.master, width=50)
@@ -143,17 +143,17 @@ class App:
         self.entry_classes.grid(row=2, column=1, padx=10, pady=5, columnspan=2, sticky="w")
 
         # --- Przycisk konwersji ---
-        self.btn_convert = tk.Button(self.master, text="Konwertuj", command=self.convert_action, bg="lightgreen")
+        self.btn_convert = tk.Button(self.master, text="Convert", command=self.convert_action, bg="lightgreen")
         self.btn_convert.grid(row=3, column=0, columnspan=3, padx=10, pady=10, sticky="nsew")
 
     def choose_pascal_folder(self):
-        folder_selected = filedialog.askdirectory(title="Wybierz folder z plikami .xml")
+        folder_selected = filedialog.askdirectory(title="Select the folder with files .xml")
         if folder_selected:
             self.pascal_dir = folder_selected
             self.entry_pascal.config(text=self.pascal_dir)
 
     def choose_yolo_folder(self):
-        folder_selected = filedialog.askdirectory(title="Wybierz folder docelowy (.txt)")
+        folder_selected = filedialog.askdirectory(title="Select destination folder (.txt)")
         if folder_selected:
             self.yolo_dir = folder_selected
             self.entry_yolo.config(text=self.yolo_dir)
@@ -161,26 +161,26 @@ class App:
     def convert_action(self):
         # Sprawdzamy, czy użytkownik wybrał oba foldery
         if not self.pascal_dir or not self.yolo_dir:
-            messagebox.showwarning("Brak ścieżki", "Wybierz oba foldery przed konwersją!")
+            messagebox.showwarning("No path", "Select both folders before conversion!")
             return
 
         # Pobranie listy klas – rozdzielamy po przecinku
         raw_classes = self.entry_classes.get()
         if not raw_classes.strip():
-            messagebox.showwarning("Brak klas", "Podaj co najmniej jedną klasę.")
+            messagebox.showwarning("No classes", "Please enter at least one class.")
             return
 
         classes_list = [cls.strip() for cls in raw_classes.split(",") if cls.strip()]
 
         if not classes_list:
-            messagebox.showwarning("Brak klas", "Podaj co najmniej jedną klasę.")
+            messagebox.showwarning("No classes", "Please enter at least one class.")
             return
 
         try:
             convert_pascal_to_yolo(self.pascal_dir, self.yolo_dir, classes_list)
-            messagebox.showinfo("Sukces", "Konwersja zakończona!")
+            messagebox.showinfo("Success", "Conversion completed!")
         except Exception as e:
-            messagebox.showerror("Błąd", f"Wystąpił błąd:\n{e}")
+            messagebox.showerror("Error", f"An error occurred:\n{e}")
 
 
 if __name__ == "__main__":
